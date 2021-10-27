@@ -43,8 +43,6 @@ string solution(string new_id) {
         if (*iter == '.')
         {
             //만약 다음 인덱스 값이 .이라면
-            iter++;
-            if()
         }
     }
     //4단계 new_id에서 마침표(.)가 처음이나 끝에 위치한다면 제거합니다.
