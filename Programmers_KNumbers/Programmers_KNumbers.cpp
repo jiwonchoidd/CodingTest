@@ -7,6 +7,7 @@ using namespace std;
 vector<int> solution(vector<int> array, vector<vector<int>> commands);
 int main()
 {
+    //테스트 케이스
     vector<int> array = { 1,5,2,6,3,7,4 };
     vector<vector<int>> commands = { {2,5,3},{4,4,1},{1,7,3} };
     vector<int> result = solution(array, commands);
