@@ -15,6 +15,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="retry.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="Programmers_RecommendedNewID.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
