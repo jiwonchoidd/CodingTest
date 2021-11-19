@@ -34,8 +34,25 @@ vector<int> solution(vector<int> arr) {
     arr.erase(arr.begin() + minindx, arr.begin() + (minindx + 1));
     return arr;
 }
+//https://programmers.co.kr/learn/courses/30/lessons/12922
 
+string solution(int n) {
+    string s = "";
+    while (n > 0)
+    {
+        if (s.length() % 2 == 0)
+        {
+            s += "¼ö";
+        }
+        else
+        {
+            s += "¹Ú";
+        }
+        n--;
+    }
+    return s;
+}
 int main()
 {
-    vector<int> e = solution({ 1,2,3,4,5,6,7,8,9 });
+   string a= solution(4);
 }
