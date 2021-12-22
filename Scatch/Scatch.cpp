@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <math.h>
 
 //using namespace std;
 //
@@ -65,8 +66,33 @@
 //
 //    return v;
 //}
-
+int solution(std::string s) {
+    int a=0;
+    bool isminus = false;
+    int length = pow(10, s.length()-1);
+    for (int i = 0; i < s.length(); i++)
+    {
+        if (s[i] >= 48 && s[i] <= 57)
+        {
+            a += (s[i]-48) * length;
+            length /= 10;
+        }
+        else
+        {
+            isminus = true;
+            length /= 10;
+        }
+    }
+    if (isminus)
+    {
+        return a * -1;
+    }
+    else
+    {
+        return a;
+    }
+}
 int main()
 {
-
+    solution("-1234");
 }
