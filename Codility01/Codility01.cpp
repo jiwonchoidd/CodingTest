@@ -7,26 +7,31 @@ void BubbleSort(vector<int>& A)
     {
         for (size_t j = 1; j < A.size() - i; j++)
         {
-            if(A[j-1]>A[j])
-            int temp = A[j - 1];
-            A[j - 1] = A[j];
-            A[j] = temp;
+            if (A[j - 1] > A[j])
+            {
+                int iTemp = A[j - 1];
+                A[j - 1] = A[j];
+                A[j] = iTemp;
+            }
         }
     }
 }
+
+vector<int> solution(vector<int>& A, int K)
+{
+    unsigned int arraySize = A.size();
+    //K번수 만큼 반복
+    while (K != -1)
+    {
+        A.pop_back();
+        A.insert(A.begin(), A.back());
+        K--;
+    }
+    return A;
+}
 int main()
 {
-    vector<int> A = { 1,3,6,4,1,2 };
-
-    BubbleSort(A);
-    for (size_t i = 1; i < A.size(); i++)
-    {
-        //다음 숫자와 이어지지 않은 경우
-        if (A[i - 1] != A[i] && A[i - 1] > 0 && A[i - 1] + 1 != A[i])
-        {
-            return A[i - 1] + 1;
-        }
-    }
-    return  A.back() + 1;
-    std::cout << "Hello World!\n";
+    vector<int> arr = { 3,8,9,7,6 };
+    solution(arr, 3);
+    arr.pop_back();
 }
