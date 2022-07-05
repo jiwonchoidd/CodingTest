@@ -29,9 +29,40 @@ vector<int> solution(vector<int>& A, int K)
     }
     return A;
 }
+
+int NumberPlus(int n)
+{
+        int temp = n;
+        int count = 0;
+        int answer = 0;
+        while (temp != 0)
+        {
+            temp = temp / 10;
+            ++count;
+        }
+        for (int i = 0; i < count; i++)
+        {
+            int pos = pow(10, i);
+            answer += n % pos;
+        }
+        return answer;
+}
+vector<int> Lastpoint(vector<vector<int> > v) {
+    vector<int> answer;
+    int x = 0;
+    int y = 0;
+    vector<int>& temp = v[0];
+    x = temp[0] ^ temp[1] ^ temp[2];
+    temp = v[1];
+    y = temp[0] ^ temp[1] ^ temp[2];
+    answer.push_back(x);
+    answer.push_back(y);
+    return answer;
+}
 int main()
 {
-    vector<int> arr = { 3,8,9,7,6 };
-    solution(arr, 3);
-    arr.pop_back();
+    NumberPlus(123);
+
+    vector<vector<int>> arr = { {1,4}, {3,4}, {3,10} };
+    Lastpoint(arr);
 }
