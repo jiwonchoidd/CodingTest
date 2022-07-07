@@ -1,21 +1,7 @@
 ﻿#include <iostream>
 #include <vector>
+#include <stack>
 using namespace std;
-void BubbleSort(vector<int>& A)
-{
-    for (size_t i = 0; i < A.size() - 1; i++)
-    {
-        for (size_t j = 1; j < A.size() - i; j++)
-        {
-            if (A[j - 1] > A[j])
-            {
-                int iTemp = A[j - 1];
-                A[j - 1] = A[j];
-                A[j] = iTemp;
-            }
-        }
-    }
-}
 
 vector<int> solution(vector<int>& A, int K)
 {
@@ -59,10 +45,65 @@ vector<int> Lastpoint(vector<vector<int> > v) {
     answer.push_back(y);
     return answer;
 }
+
+void BubbleSort(vector<int>& numbers)
+{
+    for (int i = 0; i < numbers.size() - 1; i++)
+    {
+        for (int j = 1; j < numbers.size() - i; j++)
+        {
+            if (numbers[j - 1] > numbers[j])
+            {
+                int temp = numbers[j - 1];
+                numbers[j - 1] = numbers[j];
+                numbers[j] = temp;
+            }
+        }
+    }
+}
+
+int sol6(vector<int> numbers) {
+    //정렬
+    int sum = 0;
+    int index = 0;
+    BubbleSort(numbers);
+    for (int idx = 0; idx < 10; idx++)
+    {
+        
+        if (numbers[index] != idx)
+        {
+            //해당 번호가 없음
+            sum += idx;
+        }
+        else
+        {
+            index++;
+        }
+    }
+    return sum;
+}
+//스택을 이용해 문자 중복 이어 제거
+int sol7(string s)
+{
+    stack<char> str;
+    for (int i = 0; i < s.length(); i++)
+    {
+
+        if (str.empty() || str.top() != s[i])
+        {
+            str.push(s[i]);
+        }
+        else if (str.top() == s[i])
+        {
+            str.pop();
+        }
+    }
+    //스택이 비어있다면 모두제거한것이므로 1리턴
+    if (str.empty())    return true;
+    return false;
+}
 int main()
 {
-    NumberPlus(123);
-
-    vector<vector<int>> arr = { {1,4}, {3,4}, {3,10} };
-    Lastpoint(arr);
+    string s = "cdccd";
+    sol7(s);
 }
