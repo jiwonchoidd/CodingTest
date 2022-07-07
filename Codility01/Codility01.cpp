@@ -102,8 +102,23 @@ int sol7(string s)
     if (str.empty())    return true;
     return false;
 }
+
+long long sol8(int w, int h) {
+    long long all_block = w * h;
+    long long slice = 0;
+
+    slice = sqrtf(w * w + h * h);
+    slice = floor(slice);
+
+    if (slice % 2 != 0)
+    {
+        slice += 1;
+    }
+
+    return all_block - slice;
+}
 int main()
 {
     string s = "cdccd";
-    sol7(s);
+    sol8(8,12);
 }
