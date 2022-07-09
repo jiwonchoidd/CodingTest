@@ -5,6 +5,7 @@
 #include <string>
 #include <set>
 #include <stack>
+#include <algorithm>
 using namespace std;
 void BubbleSort(vector<int>& A)
 {
@@ -392,9 +393,10 @@ vector<string> closestStraightCity(vector<string> c, vector<int> x, vector<int> 
     }
 
     //1. 직선상에 본인을 제외한 같이 있는 도시 찾기 없을 경우 NONE 저장
+    //2. 직선상의 도시를 찾으면서 만약에 직선상에 있다면 정답 가능성 있는 도시 배열에 거리값을 넣음
     for (int icurrent = 0; icurrent < q.size(); icurrent++)
     {
-        vector<pair<string, int>> city; //정답 가능성 있는 도시 배열
+        vector<pair<int, string>> city; //정답 가능성 있는 도시 배열 key는 거리, value는 도시 이름
         city.clear(); // 명시적으로 클리어
 
         string current_city = q[icurrent];
@@ -410,7 +412,7 @@ vector<string> closestStraightCity(vector<string> c, vector<int> x, vector<int> 
             if (x[other_index->second] == x[my_index->second] || y[other_index->second] == y[my_index->second])
             {
                 int distance = GetDistance(x[my_index->second], y[my_index->second], x[other_index->second], y[other_index->second]);
-                city.push_back(make_pair(other_index->first, distance));
+                city.push_back(make_pair(distance, other_index->first));//<- 정답 가능성 있는 배열 거리까지 넣음
             }
         }
         if (city.empty())//가능한 도시가 없다면 NONE
@@ -419,91 +421,150 @@ vector<string> closestStraightCity(vector<string> c, vector<int> x, vector<int> 
         }
         else if (city.size() == 1)//도시 하나만 직선상에 위치하면 하나만 출력
         {
-            answer.push_back(city[0].first);
+            answer.push_back(city[0].second);
         }
         else if (city.size() > 1)//만약 2개 이상이라면 제일 가깝거나 동일하면 사전순으로 넣기
         {
-            pair<string, int> min_distance;
-            int min = 10000;
-            for (auto c : city)
+            //정렬 거리순, 이름까지 정렬됨
+            sort(city.begin(), city.end());
+            //같은 거리가 있을 경우 이름 순으로 넣어야함
+            for (int i = 1; i < city.size(); i++)
             {
-                auto other = mp.find(c);
-                int distance = GetDistance(x[my_index->second], y[my_index->second], x[other->second], y[other->second]);
-                if (distance < min)
+                //거리가 다를 경우
+                if (city[i - 1].first != city[i].first)
                 {
-                    min = distance;
-                    min_distance = make_pair(other->first, distance);
+                    answer.push_back(city[i - 1].second);
+                    break; //탈출
                 }
-                else if (min == distance)
+                else if (city[i - 1].first == city[i].first)
                 {
-                    //같은 것이 또 있다 사전순으로 앞선 것을 넣자
-                    //작은수록 a 에 사전순에 빠른것
-                    if (other->first[0] < min_distance.first[0])
-                    {
-                        min_distance.first = other->first;
-                    }
+                    //다른 경우가 나올때까지 넣어줌
+                    answer.push_back(city[i - 1].second);
                 }
             }
-            answer.push_back(min_distance.first);
         }
     }
     return answer;
 }
 
-#define MAX_SIZE 102
-
-int edge[MAX_SIZE][MAX_SIZE];
-int visited[MAX_SIZE][MAX_SIZE];
-int row[4] = { -1,0,1,0 };
-int col[4] = { 0,-1,0,1 };
-int N, M;
 
 typedef struct _pos {
     int x;
     int y;
 }pos;
 
-int checkRangeOver(pos p) {
 
-    return !(p.x > M + 1 || p.x<1 || p.y>N + 1 || p.y < 1) ? true : false;
+int visited[100 + 1][100 + 1];
+//지나갈수없는 경우 1의 값 벽인 경우와 맵 밖일 경우, 이미 지나온 경우
+bool CanVisit(int x, int y, vector<vector<int>> maze)
+{
+    //맵을 나갔을 경우
+    if (y < 0 || y >= maze[0].size() || x < 0 || x >= maze.size())
+        return false;
+    //이미 지나온 경우
+    if (visited[x][y] == 1)return false;
+    //벽인 경우
+    if (maze[x][y] == 1) return false;
+    return true;
 }
 
-void bfs(int i, int j) {
+int minMoves(vector<vector<int>> maze, int x, int y)
+{
+    /*목적지는 모든 금을 모아서 혜교에게 가야함
+   따라서 2를 모두 지나서 주어진 xy로 가야함
+   큐를 이용한 BFS, O(v+e)*/
 
-    queue<pos> q;
+    //큐를 이용해 순차적으로 가까운것부터 수행
+    queue<int> qy, qx, qgold, qcount;
+    //초기 위치는 무조건 (0,0)에서 출발
+    qy.push(0), qx.push(0); qgold.push(0);
+    qcount.push(1);
 
-    pos temp, cur;
-    temp.x = j; temp.y = i;
+    int count = -1;
+    while (!qy.empty())
+    {
+        int cx = qx.front(); qx.pop();
+        int cy = qy.front(); qy.pop();
+        int cgold = qgold.front(); qgold.pop();
+        int cc = qcount.front(); qcount.pop();
 
-    q.push(temp);
-    visited[temp.y][temp.x] = 1;
+        //금을 다 먹은 경우 그리고 목적지에 도착한 경우 
+        if (cx == x && cy == y )
+        {
+            /*없을경우 -1를 출력해야해서
+            기본 값이 -1이고 출력할때는 +1 해야함*/
+            count = cc - 1;
+            break;
+        }
+        if (visited[cx][cy] == 1)continue; //이미 갔던 곳이면 제외
+        if(x!=cx && y!=cy)//목적지는 방문노드로 취급하지 않음
+        visited[cx][cy] = 1;
 
-    while (!q.empty()) {
-        temp = q.front();
-        q.pop();
-
-        if (temp.x == M && temp.y == N) return;
-
-        for (int a = 0; a < 4; ++a) {
-            cur.y = row[a] + temp.y;
-            cur.x = col[a] + temp.x;
-
-            if (checkRangeOver(cur) && !visited[cur.y][cur.x]
-                && edge[cur.y][cur.x]) {
-
-                q.push(cur);
-                visited[cur.y][cur.x] = visited[temp.y][temp.x] + 1;
+        /*이중 배열 기준으로 하기 때문에 X축이 Y축임*/
+        //상
+        if (CanVisit(cx - 1, cy, maze)) {
+            qy.push(cy);
+            qx.push(cx - 1);
+            qcount.push(cc + 1);
+            //금이 있을경우
+            if (maze[cx - 1][cy] == 2)
+            {
+                qgold.push(cgold+1);
+            }
+            else
+            {
+                qgold.push(cgold);
+            }
+        }
+        //하
+        if (CanVisit(cx + 1, cy, maze)) {
+            qy.push(cy);
+            qx.push(cx + 1);
+            qcount.push(cc + 1);
+            if (maze[cx + 1][cy] == 2)
+            {
+                //방문한 노드 초기화
+                qgold.push(cgold + 1);
+            }
+            else
+            {
+                qgold.push(cgold);
+            }
+        }
+        //좌
+        if (CanVisit(cx, cy - 1, maze)) {
+            qy.push(cy - 1);
+            qx.push(cx);
+            qcount.push(cc + 1);
+            if (maze[cx][cy-1] == 2)
+            {
+                qgold.push(cgold + 1);
+            }
+            else
+            {
+                qgold.push(cgold);
+            }
+        }
+        //우
+        if (CanVisit(cx, cy + 1, maze)) {
+            qy.push(cy + 1);
+            qx.push(cx);
+            qcount.push(cc + 1);
+            if (maze[cx][cy+1] == 2)
+            {
+                qgold.push(cgold + 1);
+            }
+            else
+            {
+                qgold.push(cgold);
             }
         }
     }
+    return count;
 }
-
 int main()
 {
-
-    vector<vector<int>> maze = { {0,2,0}, {0,0,1}, {1,1,1}};
-
-    bfs(1, 1);
-
-    printf("%d\n", visited[N][M]);
+    vector<vector<int>> map = { {0,2,0}, {0,0,1} ,{1,1,1} };
+    int a = minMoves(map, 1, 1);
+    cout << a;
 }
