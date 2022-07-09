@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <set>
+#include <stack>
 using namespace std;
 void BubbleSort(vector<int>& A)
 {
@@ -304,9 +305,205 @@ bool UniqueStr(string s)
 
     return true;
 }
+
+void reciprocal1(int N) {
+    float rev_num = 1.0f / N;
+    float repeat_num = rev_num;
+
+    stack<int> st; //중복 확인 스택
+    string str = "0."; //문자출력
+    int idx = 0; //반복 횟수 인덱스
+    while (1)
+    {
+        idx++;
+        repeat_num = repeat_num * 10.0f;
+        if (st.empty() ||
+            static_cast<int>(repeat_num) % 10 != st.top())
+        {
+            str += to_string(static_cast<int>(repeat_num) % 10);
+            st.push(static_cast<int>(repeat_num) % 10);
+        }
+        else if (static_cast<int>(repeat_num) % 10 == st.top())
+        {
+            //중복되는 숫자 발견, 한번더 중복 확인
+            repeat_num = repeat_num * 10.0f;
+            st.push(static_cast<int>(repeat_num) % 10);
+            if (static_cast<int>(repeat_num) % 10 == st.top())
+            {
+                //무한히 반복되는 것 맞다 판단. while문 탈출
+                repeat_num = static_cast<int>(repeat_num) % 10;
+                break;
+            }
+        }
+    }
+
+    cout << str << " " << idx;
+}
+
+void reciprocal(int N) {
+
+    string ans;
+    
+    long a = 1;
+    long b = N;
+    long remain = a % b; //나머지 연산
+    //소수점 위의 정수부 string에 저장
+    ans = to_string(a / b);
+    ans.push_back('.');
+
+    //반복되는 순환 소수를 찾기위해 나눗셈을
+    //분리해서 나머지가 같을 경우에 반복되는 순환을 판별
+    map <int, int> m;
+    while (1) 
+    {
+        //나머지가 맵에 없는 유일한 수일때 추가
+        if (m.find(remain) == m.end()) {
+            m[remain] = ans.size();
+            remain *= 10;//다음 계산을 위해 10을 곱함
+            ans.push_back((remain / b) + '0'); 
+            remain = remain % b;
+        }
+        //같은 나머지의 값이면 순환되는 것
+        else if(m.find(remain) != m.end())
+        {
+            cout << ans;
+            auto result = m.find(remain);
+            cout<<" "<<ans.substr(result->second, ans.length());
+            break;
+        }
+    }
+    
+}
+map<string, int> mp;
+int GetDistance(int ax, int ay, int bx, int by)
+{
+    //길이르 구한다.
+    //피타고라스의 정리
+    return sqrt(pow(ax - bx, 2) + pow(ay - by, 2));
+}
+
+vector<string> closestStraightCity(vector<string> c, vector<int> x, vector<int> y, vector<string> q)
+{
+    vector<string> answer;
+    //0. 해당 도시의 인덱스를 저장, q가 순서대로 들어오지 않을 경우, 쉽게 탐색하기 위함
+    for (int idx = 0; idx < c.size(); idx++)
+    {
+        mp.insert(make_pair(c[idx], idx));
+    }
+
+    //1. 직선상에 본인을 제외한 같이 있는 도시 찾기 없을 경우 NONE 저장
+    for (int icurrent = 0; icurrent < q.size(); icurrent++)
+    {
+        vector<pair<string, int>> city; //정답 가능성 있는 도시 배열
+        city.clear(); // 명시적으로 클리어
+
+        string current_city = q[icurrent];
+        auto my_index = mp.find(current_city);
+
+        for (int i = 0; i < c.size(); i++)
+        {
+            if (c[i] == current_city) continue; //본인 도시 제외
+
+            auto other_index = mp.find(c[i]); //다른 도시
+
+            //같은 직선 상 위치에 있는 도시일때 해당 거리를 저장
+            if (x[other_index->second] == x[my_index->second] || y[other_index->second] == y[my_index->second])
+            {
+                int distance = GetDistance(x[my_index->second], y[my_index->second], x[other_index->second], y[other_index->second]);
+                city.push_back(make_pair(other_index->first, distance));
+            }
+        }
+        if (city.empty())//가능한 도시가 없다면 NONE
+        {
+            answer.push_back("NONE");
+        }
+        else if (city.size() == 1)//도시 하나만 직선상에 위치하면 하나만 출력
+        {
+            answer.push_back(city[0].first);
+        }
+        else if (city.size() > 1)//만약 2개 이상이라면 제일 가깝거나 동일하면 사전순으로 넣기
+        {
+            pair<string, int> min_distance;
+            int min = 10000;
+            for (auto c : city)
+            {
+                auto other = mp.find(c);
+                int distance = GetDistance(x[my_index->second], y[my_index->second], x[other->second], y[other->second]);
+                if (distance < min)
+                {
+                    min = distance;
+                    min_distance = make_pair(other->first, distance);
+                }
+                else if (min == distance)
+                {
+                    //같은 것이 또 있다 사전순으로 앞선 것을 넣자
+                    //작은수록 a 에 사전순에 빠른것
+                    if (other->first[0] < min_distance.first[0])
+                    {
+                        min_distance.first = other->first;
+                    }
+                }
+            }
+            answer.push_back(min_distance.first);
+        }
+    }
+    return answer;
+}
+
+#define MAX_SIZE 102
+
+int edge[MAX_SIZE][MAX_SIZE];
+int visited[MAX_SIZE][MAX_SIZE];
+int row[4] = { -1,0,1,0 };
+int col[4] = { 0,-1,0,1 };
+int N, M;
+
+typedef struct _pos {
+    int x;
+    int y;
+}pos;
+
+int checkRangeOver(pos p) {
+
+    return !(p.x > M + 1 || p.x<1 || p.y>N + 1 || p.y < 1) ? true : false;
+}
+
+void bfs(int i, int j) {
+
+    queue<pos> q;
+
+    pos temp, cur;
+    temp.x = j; temp.y = i;
+
+    q.push(temp);
+    visited[temp.y][temp.x] = 1;
+
+    while (!q.empty()) {
+        temp = q.front();
+        q.pop();
+
+        if (temp.x == M && temp.y == N) return;
+
+        for (int a = 0; a < 4; ++a) {
+            cur.y = row[a] + temp.y;
+            cur.x = col[a] + temp.x;
+
+            if (checkRangeOver(cur) && !visited[cur.y][cur.x]
+                && edge[cur.y][cur.x]) {
+
+                q.push(cur);
+                visited[cur.y][cur.x] = visited[temp.y][temp.x] + 1;
+            }
+        }
+    }
+}
+
 int main()
 {
 
-    string a = "aBa";
-    UniqueStr(a);
+    vector<vector<int>> maze = { {0,2,0}, {0,0,1}, {1,1,1}};
+
+    bfs(1, 1);
+
+    printf("%d\n", visited[N][M]);
 }
