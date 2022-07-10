@@ -453,8 +453,150 @@ typedef struct _pos {
     int y;
 }pos;
 
+class Node
+{
+public:
+    //상하좌우 [0] 상 [1] 하 [2] 좌 [3] 우
+    vector<Node*> neighbor;
+    int resource;
+public:
+    void LinkVertical(Node* node) // 우로 연결
+    {
+        this->neighbor[3] = node; //해당 노드의 우측은 파라미터의 값
+        node->neighbor[2] = this; // 파라미터의 좌측은 해당 노드
+    }
+    void LinkHorizontal(Node* node)// 아래로 연결
+    {
+        this->neighbor[1] = node;
+        node->neighbor[0] = this;
+    }
+    void SetResource(int value)
+    {
+        resource = value;
+    }
+    Node()
+    {
+        resource = 0;
+        neighbor.resize(4);
+        for (int i = 0; i < 4; i++)
+        neighbor[i] = nullptr;
+    };
+    ~Node()
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            if (neighbor[i] != nullptr)
+            {
+                delete neighbor[i];
+                neighbor[i] = nullptr;
+            }
+        }
+    };
+};
+
+const int MAX = 54;
+int report[MAX][MAX];
+int Solution(int height, int width, int kit)
+{
+    int answer = 0;
+    int sum = 0;
+    int max = 0;
+    for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            sum = report[y][x];//시작 위치 값
+            int temp = kit;
+            int curpos[2] = {y,x}; //초기 위치
+            int offset[2] = {0,0};
+
+            
+            int visited[MAX][MAX] = {0,};
+            while (temp != 1)
+            {
+                visited[curpos[0]][curpos[1]] = 1;
+                max = 0; //상하좌우 제일 높은 수
+                /*1. 모든 배열을 돌며 상하좌우 중에 
+                접근 가능한 배열에 최대값을 찾아서
+                최대값 위치부터 temp 수만큼 최대값을 찾는다.
+                그렇게 얻어진 총합을 구함
+                총합중에 제일 최댓값을 리턴함*/
+                //상
+                if (curpos[0] - 1 >= 0 && curpos[0] - 1 < height && visited[curpos[0] - 1][curpos[1]] != 1)
+                {
+                    if (max < report[curpos[0] - 1][curpos[1]])
+                    {
+                        max = report[curpos[0] - 1][curpos[1]];
+                        offset[0] = -1; offset[1] = 0;
+                    }
+                }
+                //하
+                if (curpos[0] + 1 >= 0 && curpos[0] + 1 < height && visited[curpos[0] + 1][curpos[1]] != 1)
+                {
+                    if (max < report[curpos[0] + 1][curpos[1]])
+                    {
+                        max = report[curpos[0] + 1][curpos[1]];
+                        offset[0] = 1; offset[1] = 0;
+                    }
+                }
+                //좌
+                if (curpos[1] - 1 >= 0 && curpos[1] - 1 < width && visited[curpos[0]][curpos[1]-1] != 1)
+                {
+                    if (max < report[curpos[0]][curpos[1] - 1])
+                    {
+                        max = report[curpos[0]][curpos[1] - 1];
+                        offset[0] = 0; offset[1] = -1;
+                    }
+                }
+                //우
+                if (curpos[1] + 1 >= 0 && curpos[1] + 1 < width && visited[curpos[0]][curpos[1] +1] != 1)
+                {
+                    if (max < report[curpos[0]][curpos[1] + 1])
+                    {
+                        max = report[curpos[0]][curpos[1] + 1];
+                        offset[0] = 0; offset[1] = 1;
+                    }
+                }
+                sum += max;
+                //다음 위치 설정
+                curpos[0] += offset[0];
+                curpos[1] += offset[1];
+
+                temp -= 1;
+            }
+            if (answer < sum) answer= sum, cout<< sum<<"\n";
+        }
+    }
+
+    return answer;
+}
+int main2() {
+    //알고리즘 문제 입출력 연산 속도 개선
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+    int h, w, n; //높이, 너비, 건설키트
+
+    //stdin 입력받기
+    cin >> h >> w >> n;
+    int temp = 0;
+    for (int i = 0; i < h; i++)
+    {
+       cin >> temp;
+       for (int j = 0; j < w; j++)
+       {
+           int slice = (w-1)- j;
+           slice = pow(10, slice);
+           report[i][j] = (temp / slice)%10;
+       }
+    }
+    cout << Solution(h,w,n);
+
+    return 0;
+}
 
 int visited[100 + 1][100 + 1];
+int golded[100 + 1][100 + 1];
 //지나갈수없는 경우 1의 값 벽인 경우와 맵 밖일 경우, 이미 지나온 경우
 bool CanVisit(int x, int y, vector<vector<int>> maze)
 {
@@ -463,11 +605,33 @@ bool CanVisit(int x, int y, vector<vector<int>> maze)
         return false;
     //이미 지나온 경우
     if (visited[x][y] == 1)return false;
+    //이미 먹었던 골드일 경우
+    if (golded[x][y] == 1)return false;
     //벽인 경우
     if (maze[x][y] == 1) return false;
     return true;
 }
-
+void Reset(queue<int>& qx, queue<int>& qy, queue<int>& qgold, queue<int>& qcount)
+{
+    //방문노드 삭제 및 큐 다 비우기
+    memset(visited, 0, sizeof(visited));
+    while (!qy.empty())
+    {
+        qy.pop();
+    }
+    while (!qx.empty())
+    {
+        qx.pop();
+    }
+    while (!qgold.empty())
+    {
+        qgold.pop();
+    }
+    while (!qcount.empty())
+    {
+        qcount.pop();
+    }
+}
 int minMoves(vector<vector<int>> maze, int x, int y)
 {
     /*목적지는 모든 금을 모아서 혜교에게 가야함
@@ -488,6 +652,93 @@ int minMoves(vector<vector<int>> maze, int x, int y)
         int cgold = qgold.front(); qgold.pop();
         int cc = qcount.front(); qcount.pop();
 
+        if (visited[cx][cy] == 1)continue; //이미 갔던 곳이면 제외
+        if(x!=cx && y!=cy)//목적지는 방문노드로 취급하지 않음
+        visited[cx][cy] = 1;
+
+        /*이중 배열 기준으로 하기 때문에 X축이 Y축임*/
+        //상
+        if (CanVisit(cx - 1, cy, maze)) {
+            //금이 있을경우
+            if (maze[cx - 1][cy] == 2)
+            {
+                //모든 경로 큐 삭제 후 재시작
+                Reset(qx, qy, qgold, qcount);
+                golded[cx-1][cy] = 1;
+                qy.push(cy);
+                qx.push(cx - 1);
+                qcount.push(cc + 1);
+                qgold.push(cgold+1);
+                continue;
+            }
+            else
+            {
+                qgold.push(cgold);
+            }
+            qy.push(cy);
+            qx.push(cx - 1);
+            qcount.push(cc + 1);
+        }
+        //하
+        if (CanVisit(cx + 1, cy, maze)) {
+            if (maze[cx + 1][cy] == 2)
+            {
+                Reset(qx, qy, qgold, qcount);
+                golded[cx+1][cy] = 1;
+                qy.push(cy);
+                qx.push(cx + 1);
+                qcount.push(cc + 1);
+                qgold.push(cgold + 1);
+                continue;
+            }
+            else
+            {
+                qgold.push(cgold);
+            }
+            qy.push(cy);
+            qx.push(cx + 1);
+            qcount.push(cc + 1);
+        }
+        //좌
+        if (CanVisit(cx, cy - 1, maze)) {
+            if (maze[cx][cy-1] == 2)
+            {
+                Reset(qx, qy, qgold, qcount);
+                golded[cx][cy-1] = 1;
+                qy.push(cy - 1);
+                qx.push(cx);
+                qcount.push(cc + 1);
+                qgold.push(cgold + 1);
+                continue;
+            }
+            else
+            {
+                qgold.push(cgold);
+            }
+            qy.push(cy - 1);
+            qx.push(cx);
+            qcount.push(cc + 1);
+        }
+        //우
+        if (CanVisit(cx, cy + 1, maze)) {
+            if (maze[cx][cy+1] == 2)
+            {
+                Reset(qx, qy, qgold, qcount);
+                golded[cx][cy + 1] = 1;
+                qy.push(cy + 1);
+                qx.push(cx);
+                qcount.push(cc + 1);
+                qgold.push(cgold + 1);
+                continue;
+            }
+            else
+            {
+                qgold.push(cgold);
+            }
+            qy.push(cy + 1);
+            qx.push(cx);
+            qcount.push(cc + 1);
+        }
         //금을 다 먹은 경우 그리고 목적지에 도착한 경우 
         if (cx == x && cy == y )
         {
@@ -496,144 +747,122 @@ int minMoves(vector<vector<int>> maze, int x, int y)
             count = cc - 1;
             break;
         }
-        if (visited[cx][cy] == 1)continue; //이미 갔던 곳이면 제외
-        if(x!=cx && y!=cy)//목적지는 방문노드로 취급하지 않음
-        visited[cx][cy] = 1;
-
-        /*이중 배열 기준으로 하기 때문에 X축이 Y축임*/
-        //상
-        if (CanVisit(cx - 1, cy, maze)) {
-            qy.push(cy);
-            qx.push(cx - 1);
-            qcount.push(cc + 1);
-            //금이 있을경우
-            if (maze[cx - 1][cy] == 2)
-            {
-                qgold.push(cgold+1);
-            }
-            else
-            {
-                qgold.push(cgold);
-            }
-        }
-        //하
-        if (CanVisit(cx + 1, cy, maze)) {
-            qy.push(cy);
-            qx.push(cx + 1);
-            qcount.push(cc + 1);
-            if (maze[cx + 1][cy] == 2)
-            {
-                //방문한 노드 초기화
-                qgold.push(cgold + 1);
-            }
-            else
-            {
-                qgold.push(cgold);
-            }
-        }
-        //좌
-        if (CanVisit(cx, cy - 1, maze)) {
-            qy.push(cy - 1);
-            qx.push(cx);
-            qcount.push(cc + 1);
-            if (maze[cx][cy-1] == 2)
-            {
-                qgold.push(cgold + 1);
-            }
-            else
-            {
-                qgold.push(cgold);
-            }
-        }
-        //우
-        if (CanVisit(cx, cy + 1, maze)) {
-            qy.push(cy + 1);
-            qx.push(cx);
-            qcount.push(cc + 1);
-            if (maze[cx][cy+1] == 2)
-            {
-                qgold.push(cgold + 1);
-            }
-            else
-            {
-                qgold.push(cgold);
-            }
-        }
     }
     return count;
 }
-class Node
+int main()
 {
-public:
-    //상하좌우
-    vector<Node*> neighbor;
-    int resource;
-    Node()
-    {
-        resource = 0;
-        neighbor.resize(4);
-        for (int i = 0; i < 4; i++)
-        neighbor[i] = nullptr;
-    };
-    Node(int res)
-    {
-        resource = res;
-        neighbor.resize(4);
-        for (int i = 0; i < 4; i++)
-            neighbor[i] = nullptr;
-    };
-    ~Node()
-    {
-        for (int i = 0; i < 4; i++)
-        {
-            if (neighbor[i] != nullptr)
-            {
-                delete neighbor[i];
-                neighbor[i] = nullptr;
-            }
-        }
-    };
-};
-
-
-const int MAX = 54;
-int report[MAX][MAX];
-int Solution(int height, int width, int kit)
-{
-    int min = 0;
-    for (int i = 0; i < height; i++)
-    {
-        for (int i = 0; i < width; i++)
-        {
-           // while()
-        }
-    }
-
-    return min;
-}
-int main() {
-    //알고리즘 문제 입출력 연산 속도 개선
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    cout.tie(NULL);
-    int h, w, n; //높이, 너비, 건설키트
-
-    //stdin 입력받기
-    cin >> h >> w >> n;
-
-    int temp = 0;
-    for (int i = 0; i < h; i++)
-    {
-       cin >> temp;
-       for (int j = 0; j < w; j++)
-       {
-           int slice = (w-1)- j;
-           slice = pow(10, slice);
-           report[i][j] = (temp / slice)%10;
-       }
-    }
-
-    cout << Solution(h,w,n);
-
+    vector<vector<int>> arr = { {0,0,2}, {1,0,1} ,{1,0,0} };
+    cout << minMoves(arr, 2, 2);
     return 0;
 }
+
+//int visited[100 + 1][100 + 1];
+////지나갈수없는 경우 1의 값 벽인 경우와 맵 밖일 경우, 이미 지나온 경우
+//bool CanVisit(int x, int y, vector<vector<int>> maze)
+//{
+//    //맵을 나갔을 경우
+//    if (y < 0 || y >= maze[0].size() || x < 0 || x >= maze.size())
+//        return false;
+//    //이미 지나온 경우
+//    if (visited[x][y] == 1)return false;
+//    //벽인 경우
+//    if (maze[x][y] == 1) return false;
+//    return true;
+//}
+//
+//int minMoves(vector<vector<int>> maze, int x, int y)
+//{
+//    /*목적지는 모든 금을 모아서 혜교에게 가야함
+//    따라서 2를 모두 지나서 주어진 xy로 가야함
+//    큐를 이용한 BFS, O(v+e)*/
+//
+//    //큐를 이용해 순차적으로 가까운것부터 수행
+//    queue<int> qy, qx, qgold, qcount;
+//    //초기 위치는 무조건 (0,0)에서 출발
+//    qy.push(0), qx.push(0);
+//    qgold.push(0);
+//    qcount.push(1);
+//
+//    int count = -1;
+//    while (!qy.empty())
+//    {
+//        int cx = qx.front(); qx.pop();
+//        int cy = qy.front(); qy.pop();
+//        int cgold = qgold.front(); qgold.pop();
+//        int cc = qcount.front(); qcount.pop();
+//
+//        if (visited[cx][cy] == 1)continue; //이미 갔던 곳이면 제외
+//        //if(x!=cx && y!=cy)//목적지는 방문노드로 취급하지 않음
+//        visited[cx][cy] = 1;
+//
+//        //금을 다 먹은 경우 그리고 목적지에 도착한 경우 
+//        if (cx == x && cy == y)
+//        {
+//            /*없을경우 -1를 출력해야해서
+//            기본 값이 -1이고 출력할때는 +1 해야함*/
+//            count = cc - 1;
+//            break;
+//        }
+//        /*이중 배열 기준으로 하기 때문에 X축이 Y축임*/
+//        //상
+//        if (CanVisit(cx - 1, cy, maze)) {
+//            qy.push(cy);
+//            qx.push(cx - 1);
+//            qcount.push(cc + 1);
+//            //금이 있을경우
+//            if (maze[cx - 1][cy] == 2)
+//            {
+//                qgold.push(cgold + 1);
+//            }
+//            else
+//            {
+//                qgold.push(cgold);
+//            }
+//        }
+//        //하
+//        if (CanVisit(cx + 1, cy, maze)) {
+//            qy.push(cy);
+//            qx.push(cx + 1);
+//            qcount.push(cc + 1);
+//            if (maze[cx + 1][cy] == 2)
+//            {
+//                //방문한 노드 초기화
+//                qgold.push(cgold + 1);
+//            }
+//            else
+//            {
+//                qgold.push(cgold);
+//            }
+//        }
+//        //좌
+//        if (CanVisit(cx, cy - 1, maze)) {
+//            qy.push(cy - 1);
+//            qx.push(cx);
+//            qcount.push(cc + 1);
+//            if (maze[cx][cy - 1] == 2)
+//            {
+//                qgold.push(cgold + 1);
+//            }
+//            else
+//            {
+//                qgold.push(cgold);
+//            }
+//        }
+//        //우
+//        if (CanVisit(cx, cy + 1, maze)) {
+//            qy.push(cy + 1);
+//            qx.push(cx);
+//            qcount.push(cc + 1);
+//            if (maze[cx][cy + 1] == 2)
+//            {
+//                qgold.push(cgold + 1);
+//            }
+//            else
+//            {
+//                qgold.push(cgold);
+//            }
+//        }
+//    }
+//    return count;
+//}
