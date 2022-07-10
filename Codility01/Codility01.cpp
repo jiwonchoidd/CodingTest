@@ -562,9 +562,78 @@ int minMoves(vector<vector<int>> maze, int x, int y)
     }
     return count;
 }
-int main()
+class Node
 {
-    vector<vector<int>> map = { {0,2,0}, {0,0,1} ,{1,1,1} };
-    int a = minMoves(map, 1, 1);
-    cout << a;
+public:
+    //상하좌우
+    vector<Node*> neighbor;
+    int resource;
+    Node()
+    {
+        resource = 0;
+        neighbor.resize(4);
+        for (int i = 0; i < 4; i++)
+        neighbor[i] = nullptr;
+    };
+    Node(int res)
+    {
+        resource = res;
+        neighbor.resize(4);
+        for (int i = 0; i < 4; i++)
+            neighbor[i] = nullptr;
+    };
+    ~Node()
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            if (neighbor[i] != nullptr)
+            {
+                delete neighbor[i];
+                neighbor[i] = nullptr;
+            }
+        }
+    };
+};
+
+
+const int MAX = 54;
+int report[MAX][MAX];
+int Solution(int height, int width, int kit)
+{
+    int min = 0;
+    for (int i = 0; i < height; i++)
+    {
+        for (int i = 0; i < width; i++)
+        {
+           // while()
+        }
+    }
+
+    return min;
+}
+int main() {
+    //알고리즘 문제 입출력 연산 속도 개선
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+    int h, w, n; //높이, 너비, 건설키트
+
+    //stdin 입력받기
+    cin >> h >> w >> n;
+
+    int temp = 0;
+    for (int i = 0; i < h; i++)
+    {
+       cin >> temp;
+       for (int j = 0; j < w; j++)
+       {
+           int slice = (w-1)- j;
+           slice = pow(10, slice);
+           report[i][j] = (temp / slice)%10;
+       }
+    }
+
+    cout << Solution(h,w,n);
+
+    return 0;
 }
