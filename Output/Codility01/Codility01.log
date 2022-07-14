@@ -17,8 +17,8 @@ C:\Users\popo2\Documents\GitHub\CodingTest\Codility01\Codility01.cpp(364,40): wa
           [
               _Elem=char
           ]
-C:\Users\popo2\Documents\GitHub\CodingTest\Codility01\Codility01.cpp(383,16): warning C4244: 'return': 'double'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\popo2\Documents\GitHub\CodingTest\Codility01\Codility01.cpp(589,23): warning C4244: '=': 'double'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\popo2\Documents\GitHub\CodingTest\Codility01\Codility01.cpp(389,16): warning C4244: 'return': 'double'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\popo2\Documents\GitHub\CodingTest\Codility01\Codility01.cpp(603,23): warning C4244: '=': 'double'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\utility(249,16): warning C4244: '초기화 중': '_Ty'에서 '_Ty1'(으)로 변환하면서 데이터가 손실될 수 있습니다.
           with
           [

@@ -375,22 +375,23 @@ void reciprocal(int N) {
     }
     
 }
+/*
+ * 최지원 / Choi Jiwon
+ */
+
+ //전역 변수 맵 선언, 키 도시 이름, 값 인덱스 
 map<string, int> mp;
+
+//두점 사이의 길이르 구한다.
+//피타고라스의 정리
 int GetDistance(int ax, int ay, int bx, int by)
 {
-    //길이르 구한다.
-    //피타고라스의 정리
     return sqrt(pow(ax - bx, 2) + pow(ay - by, 2));
 }
 
 vector<string> closestStraightCity(vector<string> c, vector<int> x, vector<int> y, vector<string> q)
 {
     vector<string> answer;
-    //0. 해당 도시의 인덱스를 저장, q가 순서대로 들어오지 않을 경우, 쉽게 탐색하기 위함
-    for (int idx = 0; idx < c.size(); idx++)
-    {
-        mp.insert(make_pair(c[idx], idx));
-    }
 
     //1. 직선상에 본인을 제외한 같이 있는 도시 찾기 없을 경우 NONE 저장
     //2. 직선상의 도시를 찾으면서 만약에 직선상에 있다면 정답 가능성 있는 도시 배열에 거리값을 넣음
@@ -398,21 +399,33 @@ vector<string> closestStraightCity(vector<string> c, vector<int> x, vector<int> 
     {
         vector<pair<int, string>> city; //정답 가능성 있는 도시 배열 key는 거리, value는 도시 이름
         city.clear(); // 명시적으로 클리어
+        int my_index = 0;
 
         string current_city = q[icurrent];
-        auto my_index = mp.find(current_city);
+
+        //이름이 순서대로 주어졌지 않을때
+        if (q[icurrent] != c[icurrent])
+        {
+            for (int iother = 0; iother < c.size(); iother++)
+                if (q[icurrent] == c[iother])my_index = iother;
+        }
+        else
+        {
+            my_index = icurrent;
+        }
 
         for (int i = 0; i < c.size(); i++)
         {
             if (c[i] == current_city) continue; //본인 도시 제외
 
-            auto other_index = mp.find(c[i]); //다른 도시
+            int other_index = i; //다른 도시
+            string other_city = c[i];
 
-            //같은 직선 상 위치에 있는 도시일때 해당 거리를 저장
-            if (x[other_index->second] == x[my_index->second] || y[other_index->second] == y[my_index->second])
+            //같은 직선 상 위치에 있는 도시일때 해당 거리를 저장, 미리 거리 계산
+            if (x[other_index] == x[my_index->second] || y[other_index] == y[my_index->second])
             {
-                int distance = GetDistance(x[my_index->second], y[my_index->second], x[other_index->second], y[other_index->second]);
-                city.push_back(make_pair(distance, other_index->first));//<- 정답 가능성 있는 배열 거리까지 넣음
+                int distance = GetDistance(x[my_index->second], y[my_index->second], x[other_index], y[other_index]);
+                city.push_back(make_pair(distance, other_city));//<- 정답 가능성 있는 배열 거리까지 넣음
             }
         }
         if (city.empty())//가능한 도시가 없다면 NONE
@@ -446,8 +459,16 @@ vector<string> closestStraightCity(vector<string> c, vector<int> x, vector<int> 
     }
     return answer;
 }
+int main()
+{
+    vector<string> a = {"a", "b", "c"};
+    vector<string> b = { "a", "c", "b" };
 
-
+    vector<int> x = { 23,23,23 };
+    vector<int> y = {1,10,20};
+    auto answer = closestStraightCity(a, x, y, b);
+    int k = 0;
+}
 typedef struct _pos {
     int x;
     int y;
@@ -750,12 +771,7 @@ int minMoves(vector<vector<int>> maze, int x, int y)
     }
     return count;
 }
-int main()
-{
-    vector<vector<int>> arr = { {0,0,2}, {1,0,1} ,{1,0,0} };
-    cout << minMoves(arr, 2, 2);
-    return 0;
-}
+
 
 //int visited[100 + 1][100 + 1];
 ////지나갈수없는 경우 1의 값 벽인 경우와 맵 밖일 경우, 이미 지나온 경우
