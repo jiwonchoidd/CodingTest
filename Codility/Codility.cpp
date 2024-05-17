@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 /* 2022-07-28 최지원*/
-int solution(vector<int>& A) {
+int solution(std::vector<int>& A) {
     //버블 정렬
     for (size_t i = 0; i < A.size() - 1; i++)
     {
