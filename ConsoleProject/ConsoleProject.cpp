@@ -6,11 +6,49 @@
 #include <algorithm>
 using namespace std;
 
+int solution(vector<int> number);
+
 int main()
 {
-
+    int inputmax = 5;
+    vector<int> numbers;
+    for (int i = 0; i < 5; ++i)
+    {
+        int num;
+        cin >> num;
+        numbers.push_back(num);
+    }
+    solution(numbers);
 }
+int solution(vector<int> number) {
+    int answer = 0;
+    for (int i = 0; i < number.size() - 2; ++i)
+    {
+        for (int j = i + 1; j < number.size() - 1; ++j)
+        {
+            for (int k = j + 1; k < number.size(); ++k)
+            {
+                int a = number[i];
+                int b = number[j];
+                int c = number[k];
+                if (number[i] + number[j] + number[k] == 0)
+                {
+                    printf("%d + %d + %d 경우의 수\n", a, b, c);
+                }
+            }
+        }
+    }
+    return answer;
+}
+//https://school.programmers.co.kr/learn/courses/30/lessons/120845
+int solution(vector<int> box, int n) {
+    int x = box[0] / n;
+    int y = box[1] / n;
+    int z = box[2] / n;
 
+    // 상자에 들어갈 수 있는 주사위의 총 개수는 x, y, z를 곱한 값
+    return x * y * z;
+}
 
 int BlackJack()
 {
